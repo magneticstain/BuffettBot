@@ -34,7 +34,9 @@ def main():
 
     # start Oracle
     print("Starting the Oracle...")
-    srcList = []
+    srcList = [
+
+    ]
     orcl = Oracle(srcList)
 
 if __name__ == '__main__':

@@ -30,8 +30,6 @@ class Oracle:
     """
 
     def __init__(self, sourceList):
-        # check data
-        # throw exception if wrong
         if not self.setSources(sourceList):
             raise ValueError('invalid data supplied to the Oracle!')
 
