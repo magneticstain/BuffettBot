@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 """
 BuffettBot // Oracle.py
@@ -23,3 +23,30 @@ __version__ = '1.0.0-alpha'
 __maintainer__ = 'Joshua Carlson-Purcell'
 __email__ = 'jcarlson@carlso.net'
 __status__ = 'Prototype'
+
+class Oracle:
+    """
+    Class for the main data gathering and analyzation engine
+    """
+
+    def __init__(self, sourceList):
+        # check data
+        # throw exception if wrong
+        if not self.setSources(sourceList):
+            raise ValueError('invalid data supplied to the Oracle!')
+
+    # SETTERS
+    def setSources(self, sourceList):
+        """
+        Purpose:
+            Sets collection of sources (as objects)
+
+        Params:
+
+        Output:
+        """
+
+        # expects an array of source()'s
+
+
+        return False

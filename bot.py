@@ -1,18 +1,19 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 """
 BuffettBot // Bot.py
 
-The main actor in the entire BuffettBot application.
+The main actor in the BuffettBot application.
 """
 
 # MODULES
 # | Native
+import sys
 
 # | Third-Party
 
 # | Custom
-
+from lib.oracle import Oracle
 
 # METADATA
 __author__ = 'Joshua Carlson-Purcell'
@@ -30,6 +31,11 @@ def main():
     print("########################################")
     print("BuffettBot v1.0.0-alpha")
     print("########################################")
+
+    # start Oracle
+    print("Starting the Oracle...")
+    srcList = []
+    orcl = Oracle(srcList)
 
 if __name__ == '__main__':
     main()
