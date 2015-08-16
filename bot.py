@@ -13,6 +13,7 @@ from sys import exit
 # | Third-Party
 
 # | Custom
+from lib.conf import Conf
 from lib.src import Source
 from lib.oracle import Oracle
 from lib.stoc import Stoc
@@ -90,6 +91,15 @@ def main():
     print("BuffettBot v1.0.0-alpha")
     printSeparator(3)
 
+    # PARSE CONF FILES
+    conf = Conf({})
+    # conf.writeConfData()
+    try:
+        conf.readConfData()
+    except FileNotFoundError:
+        print('Conf :: ERROR :: could not load config data!')
+        exit(1)
+
     # START ORACLE ENGINE
     printSeparator(2)
     print("Starting the Oracle...")
@@ -128,7 +138,7 @@ def main():
     printSeparator(2)
 
     # END MAIN
-    ## everything went well if at this point
+    ## everything went well at this point
     exit(0)
 
 if __name__ == '__main__':
