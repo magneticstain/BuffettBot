@@ -44,7 +44,12 @@ class Oracle:
         Output:
         """
 
-        # expects an array of source()'s
+        # expects a list of source()'s
+        if isinstance(sourceList,list):
+            # source list is valid
+            # checking if the list actually contains Source() objects will be done when trying to us its resources
+            self.sources = sourceList
 
+            return True
 
         return False

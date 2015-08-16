@@ -8,12 +8,13 @@ The main actor in the BuffettBot application.
 
 # MODULES
 # | Native
-import sys
+from sys import exit
 
 # | Third-Party
 
 # | Custom
 from lib.oracle import Oracle
+from lib.src import Source
 
 # METADATA
 __author__ = 'Joshua Carlson-Purcell'
@@ -25,6 +26,37 @@ __email__ = 'jcarlson@carlso.net'
 __status__ = 'Prototype'
 
 # FUNCTIONS
+def startOracleEngine():
+    """
+    Description:
+        Starts Oracle engine with all needed params
+
+    Params:
+        NONE
+
+    Output:
+        Oracle()
+            OR
+        str
+            OR
+        None
+    """
+
+    orcl = None
+
+    try:
+        ## generate sources
+        srcList = [
+            Source('https://www.carlso.net/')
+            # Source('https://ww')
+        ]
+
+        ## start engine
+        orcl = Oracle(srcList)
+    except ValueError as e:
+        return str(e)
+
+    return orcl
 
 # MAIN
 def main():
@@ -32,12 +64,21 @@ def main():
     print("BuffettBot v1.0.0-alpha")
     print("########################################")
 
-    # start Oracle
+    # START ORACLE ENGINE
     print("Starting the Oracle...")
-    srcList = [
+    oracle = startOracleEngine()
+    if oracle is None:
+        print('ERROR: catastrophic error encountered, please verify Python install and version')
+        exit(1)
+    elif isinstance(oracle, str):
+        print('ERROR: ' + oracle)
+        exit(1)
+    else:
+        print('Oracle engine started successfully!')
 
-    ]
-    orcl = Oracle(srcList)
+    # END MAIN
+    ## everything went well if at this point
+    exit(0)
 
 if __name__ == '__main__':
     main()
