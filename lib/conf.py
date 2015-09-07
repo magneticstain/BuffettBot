@@ -29,7 +29,7 @@ class Conf:
     A class used for handling config values
     """
 
-    def __init__(self, confData):
+    def __init__(self, confData = {}):
         if not self.setConfData(confData):
             raise ValueError('invalid data supplied to Conf engine!')
 

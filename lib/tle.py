@@ -17,7 +17,7 @@ The TLE (Trade Logic Engine) is the controller for all actions, including:
 import mysql.connector
 
 # | Custom
-
+from lib.conf import Conf
 
 # METADATA
 __author__ = 'Joshua Carlson-Purcell'
@@ -179,19 +179,24 @@ class Tle:
         return self.tradeRiskLvl
 
     # OTHER FUNCTIONS
-    def getMetadataFromDb(self):
+    def getMetadataFromDb(self, dbConfData):
         """
         Description:
             Query database for metadata (balance, profit, etc)
 
         Params:
-            None
+            dbConfData [DICT]: the configuration data for the BufferBot database (e.g. username, password, etc)
 
         Output:
             Bool
         """
 
+        # connect to db using supplied config data
+        db_conn = mysql.connector.connect(**dbConfData)
 
+        # query for metadata
+
+        # set db values as object values
 
     def __str__(self):
         """

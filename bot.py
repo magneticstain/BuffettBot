@@ -93,12 +93,21 @@ def main():
     printSeparator(3)
 
     # PARSE CONF FILES
-    conf = Conf({})
-    # conf.writeConfData()
+    mainConf = Conf({})
+    # main config
     try:
-        conf.readConfData()
+        mainConf.readConfData()
     except FileNotFoundError:
-        print('Conf :: ERROR :: could not load config data!')
+        print('Conf :: ERROR :: could not load main config data')
+        exit(1)
+
+    # db config
+    dbConfigFile = '/opt/buffettbot/conf/db.json'
+    dbConf = Conf({})
+    try:
+        dbConf.readConfData(dbConfigFile)
+    except FileNotFoundError:
+        print('Conf :: ERROR :: could not load database config data :: ' + dbConfigFile)
         exit(1)
 
     # START ORACLE ENGINE
@@ -144,6 +153,9 @@ def main():
     printSeparator(1)
     print(tle)
     printSeparator(2)
+
+    # read in BB metadata from db
+    tle.getMetadataFromDb(dbConf.getConfData())
 
     # END MAIN
     ## everything went well at this point
