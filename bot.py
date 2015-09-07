@@ -11,6 +11,7 @@ The main actor in the BuffettBot application.
 from sys import exit
 
 # | Third-Party
+import mysql.connector
 
 # | Custom
 from lib.conf import Conf
@@ -132,9 +133,16 @@ def main():
     try:
         tle = Tle(1)
 
-        print('Trade-Logic Engine (TLE) started successfully!')
+        print('TLE started successfully!')
     except ValueError as e:
         print('TLE :: ERROR :: ' + e)
+    printSeparator(2)
+
+    # print TLE stats
+    printSeparator(2)
+    print('TLE Stats')
+    printSeparator(1)
+    print(tle)
     printSeparator(2)
 
     # END MAIN

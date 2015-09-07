@@ -10,6 +10,7 @@ STOC (Securities and Trade Operation Controller) is the engine responsible for i
 # | Native
 
 # | Third-Party
+import mysql.connector
 
 # | Custom
 
@@ -25,7 +26,7 @@ __status__ = 'Prototype'
 
 class Stoc:
     """
-    Class for trade-initiation logic, including: issuing trades, verifying trades, and gathering trade data
+    Class for trade-initiation logic, including: issuing trades, verifying trades, and gathering results-based trade data
     """
 
     def __init__(self, status):

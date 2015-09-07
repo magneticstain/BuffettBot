@@ -11,6 +11,7 @@ Along with that, it also created new rules of its own based on previously-learne
 # | Native
 
 # | Third-Party
+import mysql.connector
 
 # | Custom
 
@@ -40,8 +41,10 @@ class Oracle:
             Sets collection of sources (as objects)
 
         Params:
+            sourceList [DICT]: a collection of sources to be utilized by Oracle
 
         Output:
+            Bool
         """
 
         # expects a list of source()'s
@@ -53,3 +56,16 @@ class Oracle:
             return True
 
         return False
+
+    # GETTERS
+    def getSources(self):
+        """
+        Purpose:
+            Returns collection of sources (as objects)
+
+        Params:
+            NONE
+
+        Output:
+            Dict
+        """
