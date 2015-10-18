@@ -86,6 +86,39 @@ def startOracleEngine():
 
     return orcl
 
+def generateDbConfigFile():
+    """
+    Description:
+        Generate the database config file (JSON format)
+
+    Params:
+        NONE
+
+    Output:
+        Conf()
+    """
+
+    # get data from user
+    db_host = input('Hostname/IP: ')
+    db_user = input('Username: ')
+    db_pass = input('Password: ')
+
+    # compile db data in dictionary format
+    db_data = {
+        'user': db_user,
+        'password': db_pass,
+        'host': db_host
+    }
+
+    # create Conf() object with db data as conf data
+    db_conf = Conf(db_data)
+
+    # write conf file
+    db_conf.writeConfData('/opt/buffettbot/conf/db.json')
+
+    # return db data Conf() object
+    return db_conf
+
 # MAIN
 def main():
     printSeparator(3)
@@ -94,6 +127,7 @@ def main():
 
     # PARSE CONF FILES
     mainConf = Conf({})
+
     # main config
     try:
         mainConf.readConfData()
@@ -107,8 +141,13 @@ def main():
     try:
         dbConf.readConfData(dbConfigFile)
     except FileNotFoundError:
-        print('Conf :: ERROR :: could not load database config data :: ' + dbConfigFile)
-        exit(1)
+        print('Database configuration file not found! Generating one...')
+        # generate db config file and retain returned Conf() object with db data included
+        dbConf = generateDbConfigFile()
+        print('Database configuration file saved...')
+
+    # DEBUG
+    print('DEBUG :: dbConf :: ' + str(dbConf))
 
     # START ORACLE ENGINE
     printSeparator(2)
@@ -145,7 +184,12 @@ def main():
         print('TLE started successfully!')
     except ValueError as e:
         print('TLE :: ERROR :: ' + e)
+        exit(1)
     printSeparator(2)
+
+    # read in BB metadata from db
+    if not tle.syncMetadata(dbConf.getConfData(), 1):
+        print('Could not retrieve data from database!')
 
     # print TLE stats
     printSeparator(2)
@@ -154,8 +198,9 @@ def main():
     print(tle)
     printSeparator(2)
 
-    # read in BB metadata from db
-    tle.getMetadataFromDb(dbConf.getConfData())
+    # DEBUG - sync TO db
+    if not tle.syncMetadata(dbConf.getConfData(), 0):
+        print('DEBUG :: syncMetadata() :: Could not set data in database!')
 
     # END MAIN
     ## everything went well at this point

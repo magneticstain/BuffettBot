@@ -179,24 +179,119 @@ class Tle:
         return self.tradeRiskLvl
 
     # OTHER FUNCTIONS
-    def getMetadataFromDb(self, dbConfData):
+    def getMetadataFromDb(self, dbConfData, dataName):
         """
         Description:
             Query database for metadata (balance, profit, etc)
 
         Params:
             dbConfData [DICT]: the configuration data for the BufferBot database (e.g. username, password, etc)
+            dataName [STR]: name of the type of data to query for in the database
+
+        Output:
+            BLOB
+        """
+
+        dbData = ''
+
+        # connect to db using supplied config data
+        dbConn = mysql.connector.connect(**dbConfData)
+        cursor = dbConn.cursor()
+
+        # query for metadata
+        # set query
+        query = "SELECT data_value FROM tle.account_metadata WHERE data_name = '%s'"
+
+        # run it
+        cursor.execute(query, dataName)
+
+        # gather the data
+        dbData = cursor.fetchone()
+
+        # close db connection
+        dbConn.close()
+
+        return dbData
+
+    def setMetadataInDb(self, dbConfData, dataName, dataVal):
+        """
+        Description:
+            Sets data for given data name in database
+
+        Params:
+            dbConfData [DICT]: the configuration data for the BufferBot database (e.g. username, password, etc)
+            dataName [STR]: name of the type of data to query for in the database
+            dataVal [BLOB]: data to be set in the database for given dataName
 
         Output:
             Bool
         """
 
         # connect to db using supplied config data
-        db_conn = mysql.connector.connect(**dbConfData)
+        dbConn = mysql.connector.connect(**dbConfData)
+        cursor = dbConn.cursor()
 
-        # query for metadata
+        # check if we need to insert a new value or update an old one
+        currentDbDataVal = self.getMetadataFromDb(dbConfData, dataName)
+        if currentDbDataVal is None:
+            # we'll be inserting a new value
+            print('DEBUG :: Tle() :: Inserting :: ' + dataVal + ' :: ' + dataName)
+            query = "INSERT INTO tle.account_metadata SET created = NOW(), last_updated = NOW(), data_value = '%s', data_name = '%s'"
+        else:
+            # we'll be updating the current value
+            print('DEBUG :: Tle() :: Updating :: ' + dataVal + ' :: ' + dataName)
+            query = "UPDATE tle.account_metadata SET last_updated = NOW(), data_value = '%s' WHERE data_name = '%s'"
 
-        # set db values as object values
+        # run query
+        try:
+            cursor.execute(query, (dataVal, dataName))
+            dbConn.commit()
+        except mysql.connector.Error:
+            # insert failed
+            return False
+
+        # close db connection
+        dbConn.close()
+
+        return True
+
+    def syncMetadata(self, dbConfData, syncDir):
+        """
+        Description:
+            Syncs metadata to or from the database
+
+        Params:
+            syncDir [INT]: specifies which direction to sync - to (0) or from (1)
+
+        Output:
+            Bool
+        """
+
+        # verify syncDir var is valid
+        if syncDir == 0:
+            # sync TO the database
+            if (
+                not self.setMetadataInDb(dbConfData, 'balance', self.balance)
+                or not self.setMetadataInDb(dbConfData, 'total_money_spent', self.moneySpent)
+                or not self.setMetadataInDb(dbConfData, 'total_profit', self.profit)
+                or not self.setMetadataInDb(dbConfData, 'trade_risk_lvl', self.tradeRiskLvl)
+            ):
+                return False
+        elif syncDir == 1:
+            # sync FROM the database
+            # get balance
+            self.balance = self.getMetadataFromDb(dbConfData, 'balance')
+            # get total money spent
+            self.moneySpent = self.getMetadataFromDb(dbConfData, 'total_money_spent')
+            # get total profit
+            self.profit = self.getMetadataFromDb(dbConfData, 'total_profit')
+            # get trade risk level
+            self.tradeRiskLvl = self.getMetadataFromDb(dbConfData, 'trade_risk_lvl')
+        else:
+            # invalid sync direction
+            raise ValueError('TLE :: syncMetadata() :: invalid sync direction specified')
+
+        return True
 
     def __str__(self):
         """

@@ -91,7 +91,7 @@ class Conf:
         # close handle
         confFileHandle.close()
 
-        return confJsonDict
+        self.confData = confJsonDict
 
     def writeConfData(self, confFile = './conf/main.json'):
         """
@@ -102,7 +102,7 @@ class Conf:
             confFile [STR]: filename of where to save data to
 
         Output:
-            NNE
+            NONE
         """
 
         # open file
@@ -113,3 +113,19 @@ class Conf:
 
         # close file handle
         confFileHandle.close()
+
+    def __str__(self):
+        """
+        Description:
+            Overload of magic method to output a string when class is treated as such
+
+        Params:
+            NONE
+
+        Output:
+            STR
+        """
+
+        configDataStr = 'CONFIG DATA: ' + str(self.confData)
+
+        return configDataStr
