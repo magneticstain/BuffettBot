@@ -147,7 +147,7 @@ def main():
         print('Database configuration file saved...')
 
     # DEBUG
-    print('DEBUG :: dbConf :: ' + str(dbConf))
+    # print('DEBUG :: dbConf :: ' + str(dbConf))
 
     # START ORACLE ENGINE
     printSeparator(2)
@@ -188,8 +188,19 @@ def main():
     printSeparator(2)
 
     # read in BB metadata from db
-    if not tle.syncMetadata(dbConf.getConfData(), 1):
-        print('Could not retrieve data from database!')
+    try:
+        tle.syncMetadata(dbConf.getConfData(), 1)
+        print('TLE :: MSG :: inbound sync successful')
+    except ValueError as e:
+        print("TLE :: ERROR :: " + str(e))
+    except RuntimeError:
+        print('TLE :: MSG :: Did not find data in database. Creating metadatarecords...')
+
+        # set TLE engine metadata defaults
+        tle.setMetadataToDefault()
+        # sync TO db
+        if not bool(tle.syncMetadata(dbConf.getConfData(), 0)):
+            print('DEBUG :: syncMetadata() :: Could not set data in database')
 
     # print TLE stats
     printSeparator(2)
@@ -200,7 +211,7 @@ def main():
 
     # DEBUG - sync TO db
     if not tle.syncMetadata(dbConf.getConfData(), 0):
-        print('DEBUG :: syncMetadata() :: Could not set data in database!')
+         print('DEBUG :: syncMetadata() :: Could not set data in database')
 
     # END MAIN
     ## everything went well at this point

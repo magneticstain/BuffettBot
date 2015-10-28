@@ -179,6 +179,27 @@ class Tle:
         return self.tradeRiskLvl
 
     # OTHER FUNCTIONS
+    def setMetadataToDefault(self, balance = 0, moneySpent = 0, profit = 0, tradeRiskLvl = 1):
+        """
+        Description:
+            set one or more metadata values back to their default value
+
+        Params:
+            balance [INT]: default value of balance
+            moneySpent [INT]: default value of money spent
+            profit [INT]: default value of profit
+            tradeRiskLvl [INT]: default value of trade risk level
+
+        Output:
+            NONE
+        """
+
+        # set object va;s
+        self.setBalance(balance)
+        self.setMoneySpent(moneySpent)
+        self.setProfit(profit)
+        self.setTradeRiskLevel(tradeRiskLvl)
+
     def getMetadataFromDb(self, dbConfData, dataName):
         """
         Description:
@@ -200,16 +221,33 @@ class Tle:
 
         # query for metadata
         # set query
-        query = "SELECT data_value FROM tle.account_metadata WHERE data_name = '%s'"
+        query = "SELECT " \
+                "   data_value " \
+                "FROM " \
+                "   tle.account_metadata " \
+                "WHERE " \
+                "   data_name = %s"
+
 
         # run it
-        cursor.execute(query, dataName)
-
-        # gather the data
-        dbData = cursor.fetchone()
+        try:
+            # print('DEBUG :: Tle() :: getMetadataFromDb() :: Selecting :: ' + str(dataName))
+            cursor.execute(query, (dataName,))
+            #dbConn.commit()
+            # gather the data
+            dbData = cursor.fetchone()[0]
+            # print('DEBUG :: Tle() :: getMetadataFromDb() :: Selecting :: DB DATA VAL :: ' + str(dbData))
+        except mysql.connector.Error as error:
+            # print('DEBUG :: Tle() :: getMetadataFromDb() :: MySQL Error :: ' + str(error.errno) + ' :: ' + error.msg)
+            # select failed
+            return False
 
         # close db connection
         dbConn.close()
+
+        if dbData is None:
+            # print('DEBUG :: dbData IS NONE')
+            return False
 
         return dbData
 
@@ -233,20 +271,33 @@ class Tle:
 
         # check if we need to insert a new value or update an old one
         currentDbDataVal = self.getMetadataFromDb(dbConfData, dataName)
-        if currentDbDataVal is None:
+        if not currentDbDataVal:
             # we'll be inserting a new value
-            print('DEBUG :: Tle() :: Inserting :: ' + dataVal + ' :: ' + dataName)
-            query = "INSERT INTO tle.account_metadata SET created = NOW(), last_updated = NOW(), data_value = '%s', data_name = '%s'"
+            # print('DEBUG :: Tle() :: Inserting :: ' + str(dataVal) + ' :: ' + str(dataName))
+            query = "INSERT INTO " \
+                    "   tle.account_metadata " \
+                    "SET " \
+                    "   created = NOW(), " \
+                    "   last_updated = NOW(), " \
+                    "   data_value = %s, " \
+                    "   data_name = %s"
         else:
             # we'll be updating the current value
-            print('DEBUG :: Tle() :: Updating :: ' + dataVal + ' :: ' + dataName)
-            query = "UPDATE tle.account_metadata SET last_updated = NOW(), data_value = '%s' WHERE data_name = '%s'"
+            # print('DEBUG :: Tle() :: Updating :: ' + str(dataVal) + ' :: ' + str(dataName))
+            query = "UPDATE " \
+                    "   tle.account_metadata " \
+                    "SET " \
+                    "   last_updated = NOW(), " \
+                    "   data_value = %s " \
+                    "WHERE " \
+                    "   data_name = %s"
 
         # run query
         try:
-            cursor.execute(query, (dataVal, dataName))
+            cursor.execute(query, (str(dataVal), str(dataName)))
             dbConn.commit()
-        except mysql.connector.Error:
+        except mysql.connector.Error as error:
+            print('DEBUG :: Tle() :: setMetadata() :: MySQL Error :: ' + str(error.errno) + ' :: ' + error.msg)
             # insert failed
             return False
 
@@ -287,6 +338,14 @@ class Tle:
             self.profit = self.getMetadataFromDb(dbConfData, 'total_profit')
             # get trade risk level
             self.tradeRiskLvl = self.getMetadataFromDb(dbConfData, 'trade_risk_lvl')
+
+            if (
+                not self.balance
+                or not self.moneySpent
+                or not self.profit
+                or not self.tradeRiskLvl
+            ):
+                raise RuntimeError('TLE :: syncMetadata() :: could not find sync data')
         else:
             # invalid sync direction
             raise ValueError('TLE :: syncMetadata() :: invalid sync direction specified')
